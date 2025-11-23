@@ -20,30 +20,75 @@ export function Orders(){
     if (!user) return;
     setLoading(true);
     try {
-      const allPedidos = await api.pedidos.list();
-      
-      // Obtener todos los carritos del usuario (no solo el actual)
-      const todosCarritos = await api.clientes.getCarritos(user.pk_id_cliente);
-      const carritoIds = todosCarritos.map(c => c.pk_id_carrito_compra);
-      
-      // Filtrar pedidos del usuario (por sus carritos)
-      const misPedidos = allPedidos.filter(p => carritoIds.includes(p.fk_id_carrito_compra));
-      
-      // Cargar el total CONGELADO de la venta (si existe) para cada pedido
-      const ventasData = await api.ventas.list();
-      const pedidosConTotal = misPedidos.map(pedido => {
-        const venta = ventasData.find(v => v.fk_id_pedido === pedido.pk_id_pedido);
-        return {
-          ...pedido,
-          total: venta ? venta.total : 0,
-          metodo_pago: venta ? venta.metodo_pago : 'N/A'
-        };
-      });
-      
-      setPedidos(pedidosConTotal);
+      // Si es admin, cargar todos los pedidos
+      if (user.es_administrador) {
+        const allPedidos = await api.pedidos.list();
+        
+        // Cargar el total CONGELADO de la venta (si existe) para cada pedido
+        const ventasData = await api.ventas.list();
+        const pedidosConTotal = allPedidos.map(pedido => {
+          const venta = ventasData.find(v => v.fk_id_pedido === pedido.pk_id_pedido);
+          return {
+            ...pedido,
+            total: venta ? venta.total : 0,
+            metodo_pago: venta ? venta.metodo_pago : 'N/A'
+          };
+        });
+        
+        setPedidos(pedidosConTotal);
+      } else {
+        // Si es cliente, solo cargar sus pedidos
+        const allPedidos = await api.pedidos.list();
+        
+        // Obtener todos los carritos del usuario (no solo el actual)
+        const todosCarritos = await api.clientes.getCarritos(user.pk_id_cliente);
+        const carritoIds = todosCarritos.map(c => c.pk_id_carrito_compra);
+        
+        // Filtrar pedidos del usuario (por sus carritos)
+        const misPedidos = allPedidos.filter(p => carritoIds.includes(p.fk_id_carrito_compra));
+        
+        // Cargar el total CONGELADO de la venta (si existe) para cada pedido
+        const ventasData = await api.ventas.list();
+        const pedidosConTotal = misPedidos.map(pedido => {
+          const venta = ventasData.find(v => v.fk_id_pedido === pedido.pk_id_pedido);
+          return {
+            ...pedido,
+            total: venta ? venta.total : 0,
+            metodo_pago: venta ? venta.metodo_pago : 'N/A'
+          };
+        });
+        
+        setPedidos(pedidosConTotal);
+      }
     } catch (e) {
       console.error('Error loadOrders:', e);
-      if (!e.message.includes('401') && !e.message.includes('Unauthorized')) {
+      // Si es 403 (forbidden), significa que no es admin intentando acceder endpoint admin
+      if (e.message.includes('403') || e.message.includes('Acceso denegado')) {
+        console.log('No eres administrador, intentando cargar tus pedidos...');
+        // Intentar cargar como cliente
+        try {
+          const allPedidos = await api.pedidos.list();
+          const todosCarritos = await api.clientes.getCarritos(user.pk_id_cliente);
+          const carritoIds = todosCarritos.map(c => c.pk_id_carrito_compra);
+          const misPedidos = allPedidos.filter(p => carritoIds.includes(p.fk_id_carrito_compra));
+          
+          const ventasData = await api.ventas.list();
+          const pedidosConTotal = misPedidos.map(pedido => {
+            const venta = ventasData.find(v => v.fk_id_pedido === pedido.pk_id_pedido);
+            return {
+              ...pedido,
+              total: venta ? venta.total : 0,
+              metodo_pago: venta ? venta.metodo_pago : 'N/A'
+            };
+          });
+          
+          setPedidos(pedidosConTotal);
+        } catch (e2) {
+          if (!e2.message.includes('401') && !e2.message.includes('Unauthorized')) {
+            addToast('Error cargando pedidos: ' + e2.message, 'error');
+          }
+        }
+      } else if (!e.message.includes('401') && !e.message.includes('Unauthorized')) {
         addToast('Error cargando pedidos: ' + e.message, 'error');
       }
     } finally {

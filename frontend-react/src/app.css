@@ -190,3 +190,12 @@ ul li:hover {border-color:var(--primary);}
 .status-cancelled {background:#fee2e2;color:#991b1b;border:1px solid #ef4444;}
 .info-banner {background:#dbeafe;border:1px solid #3b82f6;border-radius:var(--radius);padding:.8rem 1rem;margin-bottom:1rem;}
 .info-banner p {margin:0;font-size:.85rem;color:#1e40af;line-height:1.5;}
+
+/* Tabla de clientes */
+.clients-table {margin-top:1.5rem;overflow-x:auto;}
+.clients-table table {width:100%;border-collapse:collapse;background:var(--bg-alt);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);}
+.clients-table th {background:var(--primary);color:#fff;padding:.75rem;text-align:left;font-weight:600;font-size:.85rem;letter-spacing:.3px;border:none;}
+.clients-table td {padding:.75rem;border-bottom:1px solid var(--border);font-size:.9rem;}
+.clients-table tr:hover {background:var(--bg);}
+.clients-table tr:last-child td {border-bottom:none;}
+

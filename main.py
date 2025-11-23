@@ -68,5 +68,5 @@ app.include_router(pedidos.router)
 app.include_router(ventas.router)
 app.include_router(auth.router)
 
-# Frontend estático
-app.mount('/frontend', StaticFiles(directory='frontend', html=True), name='frontend')
+# Frontend estático (comentado - frontend se sirve desde Vite)
+# app.mount('/frontend', StaticFiles(directory='frontend', html=True), name='frontend')

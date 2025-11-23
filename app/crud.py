@@ -28,6 +28,23 @@ def crear_cliente(db: Session, data: schemas.ClienteCreate) -> models.Cliente:
 def listar_clientes(db: Session):
     return db.execute(select(models.Cliente)).scalars().all()
 
+def obtener_cliente(db: Session, cliente_id: int):
+    """Obtener un cliente por ID"""
+    return db.execute(
+        select(models.Cliente).where(models.Cliente.pk_id_cliente == cliente_id)
+    ).scalar_one_or_none()
+
+def actualizar_estado_admin(db: Session, cliente_id: int, es_admin: bool) -> models.Cliente:
+    """Actualizar estado de administrador de un cliente"""
+    cliente = obtener_cliente(db, cliente_id)
+    if not cliente:
+        raise ValueError(f"Cliente {cliente_id} no encontrado")
+    
+    cliente.es_administrador = es_admin
+    db.commit()
+    db.refresh(cliente)
+    return cliente
+
 def obtener_cliente_por_correo(db: Session, correo: str):
     q = select(models.Cliente).where(models.Cliente.correo == correo)
     return db.execute(q).scalar_one_or_none()

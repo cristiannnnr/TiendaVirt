@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Numeric, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Date, Numeric, ForeignKey, UniqueConstraint, Boolean
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -14,6 +14,7 @@ class Cliente(Base):
     cedula = Column(String(15), nullable=False)
     correo = Column(String(50), nullable=False)
     contrasena = Column('contraseña', String(100), nullable=False)
+    es_administrador = Column(Boolean, nullable=False, default=False)
 
     carrito = relationship('CarritoCompra', back_populates='cliente', uselist=False)
 

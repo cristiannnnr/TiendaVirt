@@ -12,10 +12,31 @@ def register(data: schemas.ClienteCreate, db: Session = Depends(get_db)):
     existente = crud.obtener_cliente_por_correo(db, data.correo)
     if existente:
         raise HTTPException(status_code=400, detail="Correo ya registrado")
+    
+    # Hashear contraseña
     hashed = get_password_hash(data.contrasena)
-    data_dict = data.dict()
-    data_dict['contrasena'] = hashed
-    cliente = crud.crear_cliente(db, schemas.ClienteCreate(**data_dict))
+    
+    # Crear cliente con contraseña hasheada
+    from app import models
+    cliente = models.Cliente(
+        primer_nombre=data.primer_nombre,
+        segundo_nombre=data.segundo_nombre,
+        primer_apellido=data.primer_apellido,
+        segundo_apellido=data.segundo_apellido,
+        fecha_nac=data.fecha_nac,
+        cedula=data.cedula,
+        correo=data.correo,
+        contrasena=hashed,
+        es_administrador=False
+    )
+    db.add(cliente)
+    db.flush()  # ID disponible
+    
+    # Crear carrito automático
+    carrito = models.CarritoCompra(fk_id_cliente=cliente.pk_id_cliente)
+    db.add(carrito)
+    db.commit()
+    db.refresh(cliente)
     return cliente
 
 @router.post("/login", response_model=schemas.Token)

@@ -36,7 +36,8 @@ export const api = {
   clientes: {
     list: () => request('/clientes'),
     create: (payload) => request('/clientes', { method: 'POST', body: JSON.stringify(payload) }),
-    getCarritos: (clienteId) => request(`/clientes/${clienteId}/carritos`)
+    getCarritos: (clienteId) => request(`/clientes/${clienteId}/carritos`),
+    updateAdmin: (clienteId, esAdmin) => request(`/clientes/${clienteId}/admin`, { method: 'PATCH', body: JSON.stringify({ es_administrador: esAdmin }) })
   },
   auth: {
     register: (payload) => request('/auth/register', { method:'POST', body: JSON.stringify(payload)}),

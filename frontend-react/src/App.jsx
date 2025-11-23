@@ -29,7 +29,10 @@ const adminTabs = [
 function Shell() {
   const { user, logout } = useAuth();
   const [mode, setMode] = useState('customer');
-  const tabs = mode === 'admin' ? adminTabs : customerTabs;
+  
+  // Si no es admin, forzar mode a 'customer'
+  const effectiveMode = user?.es_administrador ? mode : 'customer';
+  const tabs = effectiveMode === 'admin' ? adminTabs : customerTabs;
   const [active, setActive] = useState(tabs[0]?.id);
 
   if (!user) {
@@ -59,13 +62,15 @@ function Shell() {
           <span className="logo">🛍️</span>
           <div className="brand-text">
             <h1>Tienda Virtual</h1>
-            <small>{user.correo}</small>
+            <small>{user.correo} {user.es_administrador && <span title="Administrador">👑</span>}</small>
           </div>
         </div>
-        <div className="mode-toggle">
-          <button className={mode === 'customer' ? 'active' : ''} onClick={() => { setMode('customer'); setActive('catalogo'); }}>Cliente</button>
-          <button className={mode === 'admin' ? 'active' : ''} onClick={() => { setMode('admin'); setActive('clientes'); }}>Admin</button>
-        </div>
+        {user.es_administrador && (
+          <div className="mode-toggle">
+            <button className={mode === 'customer' ? 'active' : ''} onClick={() => { setMode('customer'); setActive('catalogo'); }}>Cliente</button>
+            <button className={mode === 'admin' ? 'active' : ''} onClick={() => { setMode('admin'); setActive('clientes'); }}>Admin</button>
+          </div>
+        )}
         <nav className="nav-vertical">
           {tabs.map(t => (
             <button

@@ -21,9 +21,13 @@ class ClienteOut(BaseModel):
     fecha_nac: date
     cedula: str
     correo: EmailStr
+    es_administrador: bool = False
 
     class Config:
         from_attributes = True
+
+class ClienteUpdateAdmin(BaseModel):
+    es_administrador: bool
 
 class ProductoCreate(BaseModel):
     precio: float
@@ -118,6 +122,7 @@ class UserMe(BaseModel):
     correo: EmailStr
     primer_nombre: str
     primer_apellido: str
+    es_administrador: bool = False
 
     class Config:
         from_attributes = True
